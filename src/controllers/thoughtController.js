@@ -81,7 +81,22 @@ export const updateThoughtController = async(req,res) => {
 //delete
 export const deleteThoughtController = async(req,res) => {
     try {
-        await deleteThoughtService(req.params.id);
+        const {id} = req.params;
+
+        //verify ownership
+        const checkBook = await pool.query(
+            `SELECT t.* FROM chapterly_thoughts.thoughts t 
+            JOIN chapterly_books.books b ON t.book_id = b.id
+            WHERE t.id=$1 AND b.user_id=$2`,
+            [id, req.user.id]
+        )
+
+        if(checkBook.rows.length === 0){
+            return res.status(403).json({message:"Not authorized"})
+        }
+
+        await deleteThoughtService(id);
+        
         res.json({message:"Thought Deleted"})
     } catch (error) {
         res.status(500).json({error: error.message})
