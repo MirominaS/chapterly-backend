@@ -1,4 +1,10 @@
-import { createBookService, getBookByIdService, getBooksService, updateBookService } from "../services/bookService.js";
+import { 
+    createBookService, 
+    deleteBookService, 
+    getBookByIdService, 
+    getBooksService, 
+    updateBookService 
+} from "../services/bookService.js";
 
 export const createBookController = async (req,res) => {
     try {
@@ -49,6 +55,7 @@ export const getBookByIdController = async (req,res) => {
     }
 }
 
+//update
 export const updateController = async(req,res) => {
     try {
         const book = await updateBookService(
@@ -59,5 +66,18 @@ export const updateController = async(req,res) => {
         res.json(book);
     } catch (error) {
         res.status(500).json({error: error.message})
+    }
+}
+
+//delete
+export const deleteBookController = async(req,res) => {
+    try {
+        await deleteBookService(
+            req.params.id, 
+            req.user.id
+        );
+        res.json({message:"Book deleted"})
+    } catch (error) {
+        req.status(500).json({error: error.message})
     }
 }
