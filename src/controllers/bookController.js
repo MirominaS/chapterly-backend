@@ -1,4 +1,4 @@
-import { createBookService } from "../services/bookService.js";
+import { createBookService, getBooksService } from "../services/bookService.js";
 
 export const createBookController = async (req,res) => {
     try {
@@ -16,6 +16,16 @@ export const createBookController = async (req,res) => {
             total_pages,
         })
         res.status(201).json(book)
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+}
+
+//get all books
+export const getBooksController = async (req,res) => {
+    try {
+        const books = await getBooksService(req.user.id);
+        res.json(books);
     } catch (error) {
         res.status(500).json({error:error.message})
     }

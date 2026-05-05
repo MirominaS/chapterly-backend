@@ -12,3 +12,12 @@ export const createBookService = async (data) => {
 
     return result.rows[0];
 }
+
+//get all books
+export const getBooksService = async (user_id) => {
+    const result = await pool.query(
+        `SELECT * FROM chapterly_books.books WHERE user_id = $1 ORDER BY created_at DESC`,
+        [user_id]
+    );
+    return result.rows;
+}
