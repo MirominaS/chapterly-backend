@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { findUserByEmail, createUser } from "../services/authService.js"
+import pool from '../config/db_config.js'
 
 export const register = async (req,res) => {
     try {
@@ -87,5 +88,20 @@ export const login = async (req,res) => {
         })
     } catch (error) {
         res.status(500).json({error: error.message})
+    }
+}
+
+export const getUser = async (req,res) => {
+    try {
+        const userId = req.user.id;
+
+        const result = await pool.query(
+            "SELECT id,name,email FROM chapterly_users.users WHERE id = $1",
+            [userId]
+        );
+
+        res.json(result.rows[0])
+    } catch (error) {
+        res.status(500).json({error:error.message})
     }
 }
