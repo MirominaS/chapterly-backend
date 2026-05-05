@@ -21,6 +21,19 @@ export const getThoughtsByBookService = async (book_id) => {
     return result.rows;
 }
 
+//update
+export const updateThoughtService = async(id,data) => {
+    const {type,title,content,page_number,mood} = data;
+
+    const result = await pool.query(
+        `UPDATE chapterly_thoughts.thoughts SET
+        type=$1, title=$2, content=$3, page_number=$4, mood=$5
+        WHERE id=$6 RETURNING *`,
+        [type,title,content,page_number,mood,id]
+    )
+    return result.rows[0];
+}
+
 //delete thoughts
 export const deleteThoughtService = async(id) => {
     await pool.query(
