@@ -1,4 +1,4 @@
-import { createBookService, getBooksService } from "../services/bookService.js";
+import { createBookService, getBookByIdService, getBooksService } from "../services/bookService.js";
 
 export const createBookController = async (req,res) => {
     try {
@@ -28,5 +28,23 @@ export const getBooksController = async (req,res) => {
         res.json(books);
     } catch (error) {
         res.status(500).json({error:error.message})
+    }
+}
+
+//get one book
+export const getBookByIdController = async (req,res) => {
+    try {
+        const book = await getBookByIdService(
+            req.params.id,
+            req.user.id
+        )
+
+        if(!book) {
+            return res.status(404).json({message:"Book not found"})
+        }
+
+        res.json(book);
+    } catch (error) {
+        res.status(500).json({error: error.message})
     }
 }

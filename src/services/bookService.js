@@ -21,3 +21,13 @@ export const getBooksService = async (user_id) => {
     );
     return result.rows;
 }
+
+//get one book
+export const getBookByIdService = async (id, user_id) => {
+    const result = await pool.query(
+        `SELECT * FROM chapterly_books.books WHERE id = $1 AND user_id = $2`,
+        [id,user_id]
+    );
+
+    return result.rows[0];
+}
