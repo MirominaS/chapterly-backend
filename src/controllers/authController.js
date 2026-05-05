@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 import { findUserByEmail, createUser } from "../services/authService.js"
 import pool from '../config/db_config.js'
 
-export const register = async (req,res) => {
+export const registerController = async (req,res) => {
     try {
         const {name, email, password} = req.body;
 
@@ -46,7 +46,7 @@ export const register = async (req,res) => {
     }
 }
 
-export const login = async (req,res) => {
+export const loginController = async (req,res) => {
     try {
         const {email,password} = req.body;
 
@@ -91,7 +91,7 @@ export const login = async (req,res) => {
     }
 }
 
-export const getUser = async (req,res) => {
+export const getUserController = async (req,res) => {
     try {
         const userId = req.user.id;
 
