@@ -11,3 +11,12 @@ export const createThoughtService = async (data) => {
     );
     return result.rows[0];
 }
+
+//get by book
+export const getThoughtsByBookService = async (book_id) => {
+    const result = await pool.query(
+        `SELECT * FROM chapterly_thoughts.thoughts WHERE book_id=$1 ORDER BY created_at DESC`,
+        [book_id]
+    );
+    return result.rows;
+}
