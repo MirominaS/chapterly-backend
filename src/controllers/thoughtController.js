@@ -1,5 +1,5 @@
 import pool from "../config/db_config.js"
-import { createThoughtService, getThoughtsByBookService } from "../services/thoughtService.js";
+import { createThoughtService, deleteThoughtService, getThoughtsByBookService } from "../services/thoughtService.js";
 
 //create thought
 export const createThoughtController = async(req, res) => {
@@ -50,5 +50,15 @@ export const getThoughtsController = async(req,res) => {
         res.json(thoughts);
     } catch (error) {
         res.status(500).json({error:error.message})
+    }
+}
+
+//delete
+export const deleteThoughtController = async(req,res) => {
+    try {
+        await deleteThoughtService(req.params.id);
+        res.json({message:"Thought Deleted"})
+    } catch (error) {
+        res.status(500).json({error: error.message})
     }
 }

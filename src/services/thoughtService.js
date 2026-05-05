@@ -20,3 +20,11 @@ export const getThoughtsByBookService = async (book_id) => {
     );
     return result.rows;
 }
+
+//delete thoughts
+export const deleteThoughtService = async(id) => {
+    await pool.query(
+        `DELETE FROM chapterly_thoughts.thoughts WHERE id=$1`,
+        [id]
+    );
+}
