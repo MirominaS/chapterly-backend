@@ -31,3 +31,14 @@ export const getQuotesByBookService = async(book_id) => {
     )
     return result.rows;
 }
+
+//delete
+export const deleteQuoteService = async (id) => {
+    const result = await pool.query(
+        `DELETE FROM chapterly_quotes.quotes 
+        WHERE id = $1 RETURNING *`,
+        [id]
+    )
+
+    return result.rows[0]
+}
