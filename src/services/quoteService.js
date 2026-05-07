@@ -21,3 +21,13 @@ export const createQuoteService = async(data) => {
 
     return result.rows[0];
 }
+
+//get quotes by books
+export const getQuotesByBookService = async(book_id) => {
+    const result = await pool.query(
+        `SELECT * FROM chapterly_quotes.quotes WHERE 
+        book_id = $1 ORDER BY created_at DESC`,
+        [book_id]
+    )
+    return result.rows;
+}
