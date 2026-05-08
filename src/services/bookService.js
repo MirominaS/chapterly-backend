@@ -32,7 +32,7 @@ export const createBookService = async (data) => {
             finished_date,
             status,
             total_pages,
-            current_page,        
+            current_page    
         )
         VALUES ($1,$2,$3,$4,$5,$6,
             $7,$8,$9,$10,$11,
