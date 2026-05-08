@@ -47,8 +47,10 @@ export const updateBookService = async(id,user_id,data) => {
 
 //delete
 export const deleteBookService = async(id, user_id) => {
-    await pool.query(
-        `DELETE FROM chapterly_books.books WHERE id=$1 AND user_id=$2`,
+    const result = await pool.query(
+        `DELETE FROM chapterly_books.books WHERE id=$1 AND user_id=$2 RETURNING *`,
         [id,user_id]
     )
+
+    return result.rows[0]
 }

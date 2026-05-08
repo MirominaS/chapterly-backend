@@ -81,7 +81,7 @@ export const updateQuoteController = async(req,res) => {
 //delete
 export const deleteQuoteController = async (req,res) => {
     try {
-        const deleted = await deleteQuoteService(req.params.id);
+        const deleted = await deleteQuoteService(req.params.id,req.user.id);
 
         if(!deleted) {
             return res.status(404).json({message:"Quote not found"})

@@ -72,12 +72,15 @@ export const updateController = async(req,res) => {
 //delete
 export const deleteBookController = async(req,res) => {
     try {
-        await deleteBookService(
+        const deleted = await deleteBookService(
             req.params.id, 
             req.user.id
         );
-        res.json({message:"Book deleted"})
+        if(!deleted){
+            return res.status(404).json({message:"Book not found"})
+        }
+        res.json({message:"Book deleted",deleted})
     } catch (error) {
-        req.status(500).json({error: error.message})
+        res.status(500).json({error: error.message})
     }
 }
