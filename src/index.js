@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js"
 import bookRoutes from "./routes/bookRoutes.js"
 import thoughtRoutes from "./routes/thoughtRoutes.js"
 import quoteRoutes from "./routes/quoteRoutes.js"
+import dashboardRoutes from "./routes/dashboardRoutes.js"
 
 dotenv.config()
 
@@ -21,6 +22,8 @@ app.use("/api/books",bookRoutes)
 app.use("/api/thoughts",thoughtRoutes)
 
 app.use("/api/quotes",quoteRoutes)
+
+app.use("/api/dashboard", dashboardRoutes)
 
 const PORT = process.env.PORT || 5000
 
