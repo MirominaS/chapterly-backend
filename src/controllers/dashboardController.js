@@ -1,5 +1,5 @@
 import { getDashboardStatsService, getFormatAnalyticsService, getGenreAnalyticsService, getLanguageAnalyticsService, getRecentBooksService } from "../services/dashboardService.js"
-
+//stats
 export const getDashboardStatsController = async(req, res) => {
     try {
         const stats = await getDashboardStatsService(req.user.id);
@@ -17,7 +17,7 @@ export const getDashboardStatsController = async(req, res) => {
         res.status(500).json({error: error.message})
     }
 }
-
+//recent books
 export const getRecentBooksController = async(req,res) => {
     try {
         const books = await getRecentBooksService(req.user.id)
@@ -36,7 +36,7 @@ export const getRecentBooksController = async(req,res) => {
     }
     
 }
-
+//genre
 export const getGenreAnalyticsController = async(req,res) => {
     try {
         const genres = await getGenreAnalyticsService(req.user.id);
@@ -50,7 +50,7 @@ export const getGenreAnalyticsController = async(req,res) => {
         res.status(500).json({error: error.message})
     }
 }
-
+//language
 export const getLanguageAnalyticsController = async(req, res) => {
     try {
         const languages = await getLanguageAnalyticsService(req.user.id);
@@ -65,4 +65,17 @@ export const getLanguageAnalyticsController = async(req, res) => {
         res.status(500).json({error: error.message})
     }
 }
+//format
+export const getFormatAnalyticsController = async(req,res) => {
+    try {
+        const formats = await getFormatAnalyticsService(req.user.id);
 
+        const formattedFormats = formats.map((format) => ({
+            format: format.format,
+            count: Number(format.count),
+        }))
+        res.json(formattedFormats)
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+}

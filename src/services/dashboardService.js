@@ -64,3 +64,16 @@ export const getLanguageAnalyticsService = async (user_id) => {
     )
     return result.rows;
 }
+//format
+export const getFormatAnalyticsService = async(user_id) => {
+    const result = await pool.query(
+        `SELECT format, COUNT(*) as count
+        FROM chapterly_books.books
+        WHERE user_id = $1
+        AND format IS NOT NULL
+        GROUP BY format
+        ORDER BY count DESC`,
+        [user_id]
+    )
+    return result.rows;
+}
