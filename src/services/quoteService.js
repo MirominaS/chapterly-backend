@@ -62,10 +62,10 @@ export const updateQuoteService = async (id, data) => {
 //delete
 export const deleteQuoteService = async (id) => {
     const result = await pool.query(
-        `DELETE FROM quotes
+        `DELETE FROM chapterly_quotes.quotes
             WHERE id = $1
             AND book_id IN (
-            SELECT id FROM books WHERE user_id = $2
+            SELECT id FROM chapterly_books.books WHERE user_id = $2
             )
             RETURNING *
             `,
