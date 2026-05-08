@@ -38,7 +38,7 @@ export const updateBookService = async(id,user_id,data) => {
 
     const result = await pool.query(
         `UPDATE chapterly_books.books
-        SET title=$1, author=$2, status=$3, total_pages=$4, current_page=$5
+        SET title=$1, author=$2, status=$3, total_pages=$4, current_page=$5, updated_at = CURRENT_TIMESTAMP
         WHERE id=$6 AND user_id=$7 RETURNING *`,
         [title, author, status, total_pages, current_page, id, user_id]
     )

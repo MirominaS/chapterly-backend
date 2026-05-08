@@ -27,7 +27,7 @@ export const updateThoughtService = async(id,data) => {
 
     const result = await pool.query(
         `UPDATE chapterly_thoughts.thoughts SET
-        type=$1, title=$2, content=$3, page_number=$4, mood=$5
+        type=$1, title=$2, content=$3, page_number=$4, mood=$5,updated_at = CURRENT_TIMESTAMP
         WHERE id=$6 RETURNING *`,
         [type,title,content,page_number,mood,id]
     )

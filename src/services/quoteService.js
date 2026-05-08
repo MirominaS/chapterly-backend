@@ -48,7 +48,9 @@ export const updateQuoteService = async (id, data) => {
         page_number = $2,
         chapter = $3,
         speaker = $4,
-        comment = $5 WHERE id = $6 RETURNING *`,
+        comment = $5,
+        updated_at = CURRENT_TIMESTAMP
+        WHERE id = $6 RETURNING *`,
         [   quote_text,
             page_number,
             chapter,
