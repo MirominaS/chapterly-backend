@@ -27,3 +27,15 @@ export const getDashboardStatsService = async(user_id) => {
     )
     return result.rows[0];
 }
+
+export const getRecentBooksService = async(user_id) => {
+    const result = await pool.query(
+        `SELECT 
+            id,title,author,status,current_page,total_pages,updated_at
+            FROM chapterly_books.books 
+            WHERE user_id = $1 
+            ORDER BY updated_at DESC LIMIT 5`,
+            [user_id]
+    );
+    return result.rows;
+}
