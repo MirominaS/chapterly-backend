@@ -1,5 +1,5 @@
 import pool from "../config/db_config.js"
-
+//stats
 export const getDashboardStatsService = async(user_id) => {
     const result = await pool.query(
         `SELECT COUNT(*) AS total_books,
@@ -27,7 +27,7 @@ export const getDashboardStatsService = async(user_id) => {
     )
     return result.rows[0];
 }
-
+//recent books
 export const getRecentBooksService = async(user_id) => {
     const result = await pool.query(
         `SELECT 
@@ -39,7 +39,7 @@ export const getRecentBooksService = async(user_id) => {
     );
     return result.rows;
 }
-
+//genre
 export const getGenreAnalyticsService = async (user_id) => {
     const result = await pool.query(
         `SELECT genre, COUNT(*) AS count
@@ -49,5 +49,18 @@ export const getGenreAnalyticsService = async (user_id) => {
         ORDER BY count DESC`,
         [user_id]
     );
+    return result.rows;
+}
+//language
+export const getLanguageAnalyticsService = async (user_id) => {
+    const result = await pool.query(
+        `SELECT language, COUNT(*) AS count
+        FROM chapterly_books.books
+        WHERE user_id = $1
+        AND language IS NOT NULL
+        GROUP BY language
+        ORDER BY count DESC`,
+        [user_id]
+    )
     return result.rows;
 }
