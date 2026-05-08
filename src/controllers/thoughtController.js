@@ -1,11 +1,23 @@
 import pool from "../config/db_config.js"
 import { createThoughtService, deleteThoughtService, getThoughtsByBookService, updateThoughtService } from "../services/thoughtService.js";
 
+const allowedTypes = [
+    "before",
+    "during",
+    "after",
+]
 //create thought
 export const createThoughtController = async(req, res) => {
     try {
         const {book_id,type,title,content,page_number,mood} = req.body;
 
+        if(!allowedTypes.includes(type)) {
+            return res.status(400).json({message: "Content is required"})
+        }
+
+        if(page_number < 0){
+            return res.status(400).json({message: "Invalid page number"})
+        }
         //verify book belongs to user
         const checkBook = await pool.query(
             "SELECT * FROM chapterly_books.books WHERE id=$1 AND user_id=$2",
@@ -58,6 +70,18 @@ export const updateThoughtController = async(req,res) => {
     try {
         const {id} = req.params;
 
+        if(!allowedTypes.includes(type)){
+            return res.status(400).json({message: "Invalid thought type"})
+        }
+
+        if(!content || content.trim() === "") {
+            return res.status(400).json({message:"Content is required"})
+        }
+
+        if (page_number < 0) {
+            return res.status(400).json({message: "Invalid page number",});
+        }
+
         //verify ownership
         const checkBook = await pool.query(
             `SELECT t.* FROM chapterly_thoughts.thoughts t 
@@ -70,7 +94,13 @@ export const updateThoughtController = async(req,res) => {
             return res.status(403).json({message:"Not authorized"})
         }
 
-        const updated = await updateThoughtService(id,req.body)
+        const updated = await updateThoughtService(id,{
+            type,title,content,page_number,mood,
+        })
+
+        if (!updated) {
+            return res.status(404).json({message: "Thought not found",});
+        }
 
         res.json(updated)
     } catch (error) {
@@ -95,9 +125,13 @@ export const deleteThoughtController = async(req,res) => {
             return res.status(403).json({message:"Not authorized"})
         }
 
-        await deleteThoughtService(id);
+         const deleted = await deleteThoughtService(id);
+
+        if (!deleted) {
+            return res.status(404).json({message: "Thought not found",});
+        }
         
-        res.json({message:"Thought Deleted"})
+        res.json({message:"Thought Deleted",deleted})
     } catch (error) {
         res.status(500).json({error: error.message})
     }

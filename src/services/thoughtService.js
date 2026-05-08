@@ -33,11 +33,11 @@ export const updateThoughtService = async(id,data) => {
     )
     return result.rows[0];
 }
-
+ 
 //delete thoughts
 export const deleteThoughtService = async(id) => {
     await pool.query(
-        `DELETE FROM chapterly_thoughts.thoughts WHERE id=$1`,
+        `DELETE FROM chapterly_thoughts.thoughts WHERE id=$1 RETURNING *`,
         [id]
     );
 }
