@@ -1,4 +1,4 @@
-import { getDashboardStatsService, getRecentBooksService } from "../services/dashboardService.js"
+import { getDashboardStatsService, getGenreAnalyticsService, getRecentBooksService } from "../services/dashboardService.js"
 
 export const getDashboardStatsController = async(req, res) => {
     try {
@@ -35,4 +35,18 @@ export const getRecentBooksController = async(req,res) => {
         res.status(500).json({error: error.message,})
     }
     
+}
+
+export const getGenreAnalyticsController = async(req,res) => {
+    try {
+        const genres = await getGenreAnalyticsService(req.user.id);
+
+        const formattedGenres = genres.map((genre) => ({
+            genre: genre.genre,
+            count: Number(genre.count),
+        }))
+        res.json(formattedGenres)
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
 }
