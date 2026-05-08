@@ -1,5 +1,5 @@
 import pool from "../config/db_config.js"
-import { createQuoteService, deleteQuoteService, getQuotesByBookService } from "../services/quoteService.js";
+import { createQuoteService, deleteQuoteService, getQuotesByBookService, updateQuoteService } from "../services/quoteService.js";
 
 export const createQuoteController = async (req, res) => {
     try {
@@ -57,6 +57,24 @@ export const getQuotesController = async(req,res) => {
         res.json(quotes);
     } catch (error) {
         res.status(500).json({ error: error.message})
+    }
+}
+
+//update
+export const updateQuoteController = async(req,res) => {
+    try {
+        const updated = await updateQuoteService(
+            req.params.id,
+            req.body
+        )
+
+        if(!updated) {
+            return res.status(404).json({message:"Quote not found",})
+        }
+
+        res.json(updated)
+    } catch (error) {
+        res.status(500).json({error:error.message})
     }
 }
 

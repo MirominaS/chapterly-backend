@@ -32,6 +32,33 @@ export const getQuotesByBookService = async(book_id) => {
     return result.rows;
 }
 
+//update
+export const updateQuoteService = async (id, data) => {
+    const {
+        quote_text,
+        page_number,
+        chapter,
+        speaker,
+        comment,
+    } = data;
+
+    const result = await pool.query(
+        `UPDATE chapterly_quotes.quotes SET
+        quote_text = $1,
+        page_number = $2,
+        chapter = $3,
+        speaker = $4,
+        comment = $5 WHERE id = $6 RETURNING *`,
+        [   quote_text,
+            page_number,
+            chapter,
+            speaker,
+            comment,
+            id,]
+    )
+    return result.rows[0];
+}
+
 //delete
 export const deleteQuoteService = async (id) => {
     const result = await pool.query(
