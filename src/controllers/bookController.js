@@ -11,19 +11,35 @@ const allowedStatuses = [
     "Ongoing",
     "Completed",
     "Paused",
-    "Droped"
+    "Dropped"
 ];
 
 export const createBookController = async (req,res) => {
     try {
-        let {title,author,status,total_pages,current_page} = req.body;
+        let {
+            title,
+            author,
+            status,
+            genre,
+            format,
+            language,
+            rating,
+            description,
+            start_date,
+            finished_date,
+            total_pages,
+            current_page
+        } = req.body;
 
         if(!title || title.trim() === "") {
             return res.status(400).json({message: "Title is required"})
         }
 
+        title = title.trim();
+
         total_pages = Number(total_pages) || 0;
         current_page = Number(current_page) || 0; 
+        rating = rating ? Number(rating) : null;
         
         if(total_pages < 0 || current_page < 0) {
             return res.status(400).json({message: "Pages cannot be negative"})
@@ -31,6 +47,10 @@ export const createBookController = async (req,res) => {
 
         if(current_page > total_pages){
             return res.status(400).json({message: "Current page cannot exceed total pages"})
+        }
+
+        if (rating && (rating < 1 || rating > 5)) {
+            return res.status(400).json({ message:"Rating must be between 1 and 5",});
         }
 
         if(current_page === 0){
@@ -45,12 +65,19 @@ export const createBookController = async (req,res) => {
 
         if(!allowedStatuses.includes(status)){
             return res.status(400).json({message: "Invalid status"})
-        }
+        }        
 
         const book = await createBookService({
             user_id: req.user.id,
             title,
             author,
+            genre,
+            format,
+            language,
+            rating,
+            description,
+            start_date,
+            finished_date,
             status,
             total_pages,
             current_page,
@@ -119,15 +146,29 @@ export const getBookByIdController = async (req,res) => {
 export const updateController = async(req,res) => {
     try {
         let{
-            title,
+           title,
             author,
+            genre,
+            format,
+            language,
+            rating,
+            description,
+            start_date,
+            finished_date,
             status,
             total_pages,
             current_page,
         } = req.body;
 
+        if(!title || title.trim() === ""){
+            return res.status(400).json({message: "Title is required",})
+        }
+
+        title = title.trim();
+
         total_pages = Number(total_pages) ||0;
         current_page = Number(current_page) || 0;
+        rating = rating ? Number(rating) : null;
 
         if(total_pages < 0 || current_page < 0) {
             return res.status(400).json({message: "Pages cannot be negative",})
@@ -135,6 +176,10 @@ export const updateController = async(req,res) => {
 
         if(current_page > total_pages) {
             return res.status(400).json({message: "Current page cannot exceed total pages"})
+        }
+
+        if (rating && (rating < 1 || rating > 5)) {
+            return res.status(400).json({message: "Rating must be between 1 and 5",});
         }
 
         if (current_page === 0) {
@@ -157,6 +202,13 @@ export const updateController = async(req,res) => {
             {
                 title,
                 author,
+                genre,
+                format,
+                language,
+                rating,
+                description,
+                start_date,
+                finished_date,
                 status,
                 total_pages,
                 current_page,

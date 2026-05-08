@@ -2,12 +2,56 @@ import pool from "../config/db_config.js"
 
 //create
 export const createBookService = async (data) => {
-    const {user_id,title,author,status,total_pages,current_page} = data;
+    const {
+        user_id,
+        title,
+        author,
+        genre,
+        format,
+        language,
+        rating,
+        description,
+        start_date,
+        finished_date,
+        status,
+        total_pages,
+        current_page,
+    } = data;
 
     const result = await pool.query(
-        `INSERT INTO chapterly_books.books (user_id,title,author,status,total_pages,current_page)
-        VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-        [user_id,title,author,status,total_pages,current_page]
+        `INSERT INTO chapterly_books.books (
+            user_id,
+            title,
+            author,
+            genre,
+            format,
+            language,
+            rating,
+            description,
+            start_date,
+            finished_date,
+            status,
+            total_pages,
+            current_page,        
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,
+            $7,$8,$9,$10,$11,
+            $12,$13) RETURNING *`,
+        [   
+            user_id,
+            title,
+            author,
+            genre,
+            format,
+            language,
+            rating,
+            description,
+            start_date,
+            finished_date,
+            status,
+            total_pages,
+            current_page,
+        ]
     )
 
     return result.rows[0];
@@ -34,13 +78,54 @@ export const getBookByIdService = async (id, user_id) => {
 
 //update
 export const updateBookService = async(id,user_id,data) => {
-    const {title,author,status,total_pages,current_page} = data;
+    const {
+        title,
+        author,
+        genre,
+        format,
+        language,
+        rating,
+        description,
+        start_date,
+        finished_date,
+        status,
+        total_pages,
+        current_page,
+    } = data;
 
     const result = await pool.query(
         `UPDATE chapterly_books.books
-        SET title=$1, author=$2, status=$3, total_pages=$4, current_page=$5, updated_at = CURRENT_TIMESTAMP
-        WHERE id=$6 AND user_id=$7 RETURNING *`,
-        [title, author, status, total_pages, current_page, id, user_id]
+        SET 
+            title=$1,
+            author=$2,
+            genre=$3,
+            format=$4,
+            language=$5,
+            rating=$6,
+            description=$7,
+            start_date=$8,
+            finished_date=$9,
+            status=$10,
+            total_pages=$11,
+            current_page=$12,
+            updated_at=CURRENT_TIMESTAMP
+        WHERE id=$13 AND user_id=$14 RETURNING *`,
+        [
+            title,
+            author,
+            genre,
+            format,
+            language,
+            rating,
+            description,
+            start_date,
+            finished_date,
+            status,
+            total_pages,
+            current_page,
+            id,
+            user_id,
+        ]
     )
     return result.rows[0]
 }
