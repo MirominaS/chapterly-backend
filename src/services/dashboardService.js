@@ -77,3 +77,22 @@ export const getFormatAnalyticsService = async(user_id) => {
     )
     return result.rows;
 }
+//monthly completed
+export const getMonthlyCompletedService = async (user_id) => {
+    const result = await pool.query(
+      `SELECT TO_CHAR(
+          finished_date,
+          'Month'
+        ) AS month,
+        COUNT(*) AS completed
+        FROM chapterly_books.books
+        WHERE user_id = $1
+        AND status = 'Completed'
+        AND finished_date IS NOT NULL
+        GROUP BY
+        EXTRACT(MONTH FROM finished_date), month
+        ORDER BY EXTRACT(MONTH FROM finished_date)`,
+        [user_id]
+    )
+    return result.rows;
+  };

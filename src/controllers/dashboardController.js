@@ -1,4 +1,4 @@
-import { getDashboardStatsService, getFormatAnalyticsService, getGenreAnalyticsService, getLanguageAnalyticsService, getRecentBooksService } from "../services/dashboardService.js"
+import { getDashboardStatsService, getFormatAnalyticsService, getGenreAnalyticsService, getLanguageAnalyticsService, getMonthlyCompletedService, getRecentBooksService } from "../services/dashboardService.js"
 //stats
 export const getDashboardStatsController = async(req, res) => {
     try {
@@ -77,5 +77,19 @@ export const getFormatAnalyticsController = async(req,res) => {
         res.json(formattedFormats)
     } catch (error) {
         res.status(500).json({error:error.message})
+    }
+}
+//monthly completed
+export const getMonthlyCompletedController = async(req,res) => {
+    try {
+        const monthlyStats = await getMonthlyCompletedService(req.user.id);
+
+        const formattedStats = monthlyStats.map((stat) => ({
+            month: stat.month.trim(),
+            completed: Number(stat.completed),
+        }))
+        res.json(formattedStats)
+    } catch (error) {
+        res.status(500).json({error: error.message})
     }
 }
