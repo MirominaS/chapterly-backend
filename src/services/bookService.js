@@ -56,6 +56,17 @@ export const createBookService = async (data) => {
 
     return result.rows[0];
 }
+//duplicate check
+export const duplicateCheckService = async(user_id,title,author) => {
+    const result = await pool.query(
+        `SELECT * FROM chapterly_books.books
+        WHERE user_id = $1
+        AND LOWER(title) = LOWER($2)
+        AND LOWER(author) = LOWER($3)`,
+        [user_id,title,author]
+    )
+    return result.rowCount > 0
+}
 
 //get all books
 export const getBooksService = async (user_id) => {

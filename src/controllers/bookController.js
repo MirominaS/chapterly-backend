@@ -1,6 +1,7 @@
 import { 
     createBookService, 
     deleteBookService, 
+    duplicateCheckService, 
     getBookByIdService, 
     getBooksService, 
     updateBookService 
@@ -36,6 +37,13 @@ export const createBookController = async (req,res) => {
         }
 
         title = title.trim();
+        author = author?.trim() || null;
+
+        const duplicate = await duplicateCheckService(req.user.id, title,author);
+        
+        if(duplicate){
+            return res.status(400).json({message: "Book already exist in your library"})
+        }
 
         total_pages = Number(total_pages) || 0;
         current_page = Number(current_page) || 0; 
@@ -55,13 +63,17 @@ export const createBookController = async (req,res) => {
 
         if(current_page === 0){
             status = "Not Started"
-        } else if(current_page === total_pages) {
-            status = "Completed"
-        } else if (
-            status !== "Paused" && status !== "Dropped"
-        ){
+        } else if(current_page === total_pages && total_pages > 0) {
+            status = "Completed";
+
+            finished_date = new Date().toISOString().split("T")[0];
+        } else if( status !== "Paused" && status !== "Dropped"){
             status = "Ongoing"
         }
+
+        if(current_page > 0 && !start_date){
+            start_date = new Date().toISOString().split("T")[0];
+        }        
 
         if(!allowedStatuses.includes(status)){
             return res.status(400).json({message: "Invalid status"})
@@ -184,12 +196,26 @@ export const updateController = async(req,res) => {
 
         if (current_page === 0) {
             status = "Not Started";
-        } else if (current_page === total_pages) {
+
+            start_date = null;
+            finished_date = null;
+
+        } else if (current_page === total_pages && total_pages > 0) {
             status = "Completed";
-        } else if (
-            status !== "Paused" && status !== "Dropped"
-        ) {
+
+            finished_date = new Date().toISOString().split("T")[0];
+
+            if(!start_date){
+                start_date = new Date().toISOString().split("T")[0];
+            }
+        } else if (status !== "Paused" && status !== "Dropped") {
             status = "Ongoing";
+
+            finished_date = null;
+
+            if(!start_date) {
+                start_date = new Date().toISOString().split("T")[0]
+            }
         }
 
         if (!allowedStatuses.includes(status)) {
