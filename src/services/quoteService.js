@@ -62,7 +62,7 @@ export const updateQuoteService = async (id, data) => {
 }
 
 //delete
-export const deleteQuoteService = async (id) => {
+export const deleteQuoteService = async (id,user_id) => {
     const result = await pool.query(
         `DELETE FROM chapterly_quotes.quotes
             WHERE id = $1

@@ -68,6 +68,7 @@ export const getThoughtsController = async(req,res) => {
 //update
 export const updateThoughtController = async(req,res) => {
     try {
+        const {type,title,content,page_number,mood} = req.body;
         const {id} = req.params;
 
         if(!allowedTypes.includes(type)){

@@ -60,7 +60,7 @@ export const getQuotesController = async(req,res) => {
             [book_id, req.user.id]
         )
 
-        if(checkBook.rowCount.length === 0){
+        if(checkBook.rows.length === 0){
             return res.status(403).json({message: "Not authorized",})
         }
 
@@ -100,7 +100,7 @@ export const updateQuoteController = async(req,res) => {
             [id,req.user.id]
         )
 
-        if(quoteCheck.row.length === 0){
+        if(quoteCheck.rows.length === 0){
             return res.status(403).json({message: "Not authorized"})
         }
 
