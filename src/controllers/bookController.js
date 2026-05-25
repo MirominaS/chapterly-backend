@@ -20,16 +20,12 @@ export const createBookController = async (req,res) => {
         let {
             title,
             author,
-            status,
             genre,
             format,
             language,
-            rating,
             description,
-            start_date,
-            finished_date,
             total_pages,
-            current_page
+            cover_image,
         } = req.body;
 
         if(!title || title.trim() === "") {
@@ -46,38 +42,17 @@ export const createBookController = async (req,res) => {
         }
 
         total_pages = Number(total_pages) || 0;
-        current_page = Number(current_page) || 0; 
-        rating = rating ? Number(rating) : null;
         
-        if(total_pages < 0 || current_page < 0) {
+        if(total_pages < 0) {
             return res.status(400).json({message: "Pages cannot be negative"})
         }
 
-        if(current_page > total_pages){
-            return res.status(400).json({message: "Current page cannot exceed total pages"})
-        }
-
-        if (rating && (rating < 1 || rating > 5)) {
-            return res.status(400).json({ message:"Rating must be between 1 and 5",});
-        }
-
-        if(current_page === 0){
-            status = "Not Started"
-        } else if(current_page === total_pages && total_pages > 0) {
-            status = "Completed";
-
-            finished_date = new Date().toISOString().split("T")[0];
-        } else if( status !== "Paused" && status !== "Dropped"){
-            status = "Ongoing"
-        }
-
-        if(current_page > 0 && !start_date){
-            start_date = new Date().toISOString().split("T")[0];
-        }        
-
-        if(!allowedStatuses.includes(status)){
-            return res.status(400).json({message: "Invalid status"})
-        }        
+        const status = "Not Started";
+        const current_page = 0;
+        const rating = null;
+        const start_date = null;
+        const finished_date = null;
+        const progress = 0;
 
         const book = await createBookService({
             user_id: req.user.id,
@@ -86,19 +61,16 @@ export const createBookController = async (req,res) => {
             genre,
             format,
             language,
-            rating,
+            total_pages,
             description,
+            cover_image,
+
+            rating,
             start_date,
             finished_date,
             status,
-            total_pages,
             current_page,
         })
-
-        const progress = total_pages > 0 ? 
-            Math.round(
-                (current_page/total_pages)*100
-            ) : 0;
 
         res.status(201).json({...book, progress_percentage: progress})
     } catch (error) {
@@ -157,100 +129,119 @@ export const getBookByIdController = async (req,res) => {
 //update
 export const updateController = async(req,res) => {
     try {
-        let{
-           title,
-            author,
-            genre,
-            format,
-            language,
-            rating,
-            description,
-            start_date,
-            finished_date,
-            status,
-            total_pages,
-            current_page,
-        } = req.body;
+        //get existing book
+        const existingBook = await getBookByIdService(
+            req.params.id,
+            req.user.id
+        )
 
-        if(!title || title.trim() === ""){
-            return res.status(400).json({message: "Title is required",})
+        if(!existingBook) {
+            return res.status(404).json({
+                message:"Book not found",
+            })
         }
 
-        title = title.trim();
+        //merge existing data with new data
+        let updatedData = {
+            ...existingBook,
+            ...req.body,
+        }
+      
+        //trim strings
+        updatedData.title = updatedData.title?.trim();
 
-        total_pages = Number(total_pages) ||0;
-        current_page = Number(current_page) || 0;
-        rating = rating ? Number(rating) : null;
+        updatedData.author = updatedData.author?.trim();
 
-        if(total_pages < 0 || current_page < 0) {
-            return res.status(400).json({message: "Pages cannot be negative",})
+        //validations
+        if(req.body.title !== undefined && updatedData.title.trim() === ""){
+                return res.status(400).json({
+                message:"Title is required"
+            })
         }
 
-        if(current_page > total_pages) {
-            return res.status(400).json({message: "Current page cannot exceed total pages"})
+        updatedData.total_pages = Number(updatedData.total_pages) || 0;
+        
+        updatedData.current_page = Number(updatedData.current_page) || 0;
+
+        updatedData.rating = updatedData.rating ? Number(updatedData.rating): null;
+
+        if ( updatedData.total_pages < 0 || updatedData.current_page < 0) {
+            return res.status(400).json({
+            message: "Pages cannot be negative",
+            });
         }
 
-        if (rating && (rating < 1 || rating > 5)) {
-            return res.status(400).json({message: "Rating must be between 1 and 5",});
+        if ( updatedData.current_page > updatedData.total_pages) {
+            return res.status(400).json({
+            message: "Current page cannot exceed total pages",
+            });
         }
 
-        if (current_page === 0) {
-            status = "Not Started";
+        if ( updatedData.rating && (updatedData.rating < 1 || updatedData.rating > 5)) {
+            return res.status(400).json({
+            message: "Rating must be between 1 and 5",
+            });
+        }
 
-            start_date = null;
-            finished_date = null;
+         // smart status logic
+        if ( updatedData.current_page === 0) {
+            updatedData.status = "Not Started";
+            updatedData.start_date = null;
+            updatedData.finished_date = null;
 
-        } else if (current_page === total_pages && total_pages > 0) {
-            status = "Completed";
+        } else if ( updatedData.current_page === updatedData.total_pages && updatedData.total_pages > 0) {
 
-            finished_date = new Date().toISOString().split("T")[0];
+            updatedData.status = "Completed";
 
-            if(!start_date){
-                start_date = new Date().toISOString().split("T")[0];
+            updatedData.finished_date = new Date().toISOString().split("T")[0];
+
+            if ( !updatedData.start_date) {
+            updatedData.start_date = new Date().toISOString().split("T")[0];
             }
-        } else if (status !== "Paused" && status !== "Dropped") {
-            status = "Ongoing";
 
-            finished_date = null;
+        } else if ( updatedData.status !== "Paused" && updatedData.status !=="Dropped") {
 
-            if(!start_date) {
-                start_date = new Date().toISOString().split("T")[0]
+            updatedData.status = "Ongoing";
+
+            updatedData.finished_date = null;
+
+            if ( !updatedData.start_date ) {
+            updatedData.start_date = new Date().toISOString().split("T")[0];
             }
         }
 
-        if (!allowedStatuses.includes(status)) {
-            return res.status(400).json({message: "Invalid status"})
+        // validate status
+        if (!allowedStatuses.includes(
+            updatedData.status
+            )
+        ) {
+            return res.status(400).json({
+            message: "Invalid status",
+            });
         }
 
-        const book = await updateBookService(
+        const updatedBook =
+            await updateBookService(
             req.params.id,
             req.user.id,
-            {
-                title,
-                author,
-                genre,
-                format,
-                language,
-                rating,
-                description,
-                start_date,
-                finished_date,
-                status,
-                total_pages,
-                current_page,
-            }
-        );
+            updatedData
+            );
 
-        if(!book) {
-            return res.status(404).json({message: "Book not found"})
-        }
-
-        const progress = total_pages > 0
+        const progress =
+            updatedBook.total_pages > 0
             ? Math.round(
-                (current_page/total_pages)*100
-            ) : 0;
+                (
+                    updatedBook.current_page /
+                    updatedBook.total_pages
+                ) * 100
+                )
+            : 0;
 
-        res.json({...book,progress_percentage:progress});
+        res.json({
+            ...updatedBook,
+            progress_percentage:
+            progress,
+      });
     } catch (error) {
         res.status(500).json({error: error.message})
     }

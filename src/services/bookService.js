@@ -9,13 +9,15 @@ export const createBookService = async (data) => {
         genre,
         format,
         language,
-        rating,
         description,
+        total_pages,
+        cover_image,
+
+        status,
+        current_page,
+        rating,
         start_date,
         finished_date,
-        status,
-        total_pages,
-        current_page,
     } = data;
 
     const result = await pool.query(
@@ -26,31 +28,35 @@ export const createBookService = async (data) => {
             genre,
             format,
             language,
-            rating,
             description,
-            start_date,
-            finished_date,
-            status,
             total_pages,
-            current_page    
+            cover_image,   
+
+            status,
+            current_page,
+            rating,
+            start_date,
+            finished_date
         )
         VALUES ($1,$2,$3,$4,$5,$6,
             $7,$8,$9,$10,$11,
-            $12,$13) RETURNING *`,
-        [   
+            $12,$13,$14) RETURNING *`,
+        [  
             user_id,
             title,
             author,
             genre,
             format,
             language,
-            rating,
             description,
+            total_pages,
+            cover_image,
+
+            status,
+            current_page,
+            rating,
             start_date,
             finished_date,
-            status,
-            total_pages,
-            current_page,
         ]
     )
 
@@ -95,45 +101,51 @@ export const updateBookService = async(id,user_id,data) => {
         genre,
         format,
         language,
-        rating,
         description,
+        total_pages,
+        cover_image,
+
+        status,
+        current_page,
+        rating,
         start_date,
         finished_date,
-        status,
-        total_pages,
-        current_page,
     } = data;
 
     const result = await pool.query(
         `UPDATE chapterly_books.books
         SET 
-            title=$1,
-            author=$2,
-            genre=$3,
-            format=$4,
-            language=$5,
-            rating=$6,
-            description=$7,
-            start_date=$8,
-            finished_date=$9,
-            status=$10,
-            total_pages=$11,
-            current_page=$12,
+            title = $1,
+            author = $2,
+            genre = $3,
+            format = $4,
+            language = $5,
+            description = $6,
+            total_pages = $7,
+            cover_image = $8,
+
+            status = $9,
+            current_page = $10,
+            rating = $11,
+            start_date = $12,
+            finished_date = $13,
             updated_at=CURRENT_TIMESTAMP
-        WHERE id=$13 AND user_id=$14 RETURNING *`,
+        WHERE id=$14 AND user_id=$15 RETURNING *`,
         [
             title,
             author,
             genre,
             format,
             language,
-            rating,
             description,
+            total_pages,
+            cover_image,
+
+            status,
+            current_page,
+            rating,
             start_date,
             finished_date,
-            status,
-            total_pages,
-            current_page,
             id,
             user_id,
         ]
