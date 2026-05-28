@@ -2,6 +2,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { findUserByEmail, createUser } from "../services/authService.js"
 import pool from '../config/db_config.js'
+import { verifyKindeToken } from "../middleware/kindeAuthMiddleware.js";
 
 export const registerController = async (req,res) => {
     try {
@@ -22,7 +23,7 @@ export const registerController = async (req,res) => {
         const hashedPassword = await bcrypt.hash(password,10)
 
         //create user
-        const user = await createUser(name, email, hashedPassword)
+        const user = await createUser(name, email, hashedPassword,"local",null)
 
         const token = jwt.sign(
             {
@@ -60,6 +61,12 @@ export const loginController = async (req,res) => {
 
         if(!user){
             return res.status(400).json({message:"Invalid credentials"})
+        }
+
+        if (!user.password) {
+            return res.status(400).json({
+                message: "Use Google login",
+            });
         }
 
         const isMatch =user ? await bcrypt.compare(password,user.password) : false;
@@ -105,3 +112,66 @@ export const getUserController = async (req,res) => {
         res.status(500).json({error:error.message})
     }
 }
+
+export const googleAuthController = async (req, res) => {
+  try {
+    console.log("REQ BODY:", req.body);
+
+    const { token, user: googleUser } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Token is required",
+      });
+    }
+
+    if (!googleUser) {
+      return res.status(400).json({
+        message: "Google user data missing",
+      });
+    }
+
+    const email = googleUser.email;
+
+    const name =
+      googleUser.givenName ||
+      googleUser.familyName ||
+      email.split("@")[0];
+
+    const googleId = googleUser.id;
+
+    let user = await findUserByEmail(email);
+
+    if (!user) {
+      user = await createUser(
+        name,
+        email,
+        null,
+        "google",
+        googleId
+      );
+    }
+
+    const appToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.json({
+      token: appToken,
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
