@@ -1,98 +1,152 @@
-import pool from "../config/db_config.js"
-//stats
-export const getDashboardStatsService = async(user_id) => {
-    const result = await pool.query(
-        `SELECT COUNT(*) AS total_books,
-            COUNT(*) FILTER (
-            WHERE status = 'Completed') AS completed_books,
-            
-            COUNT(*) FILTER (
-            WHERE status = 'Ongoing') AS ongoing_books,
+import Book from "../models/Book.js";
 
-            COUNT(*) FILTER (
-            WHERE status = 'Not Started') AS not_started_books,
+// stats
+export const getDashboardStatsService = async (user_id) => {
+  const books = await Book.find({ user_id });
 
-            COUNT(*) FILTER (
-            WHERE status = 'Paused') AS paused_books,
+  return {
+    total_books: books.length,
+    completed_books: books.filter(
+      (b) => b.status === "Completed"
+    ).length,
 
-            COUNT(*) FILTER (
-            WHERE status = 'Dropped') AS dropped_books,
+    ongoing_books: books.filter(
+      (b) => b.status === "Ongoing"
+    ).length,
 
-            COALESCE(
-                SUM(current_page),0) AS total_pages_read
+    not_started_books: books.filter(
+      (b) => b.status === "Not Started"
+    ).length,
 
-            FROM chapterly_books.books
-            WHERE user_id = $1`,
-            [user_id]
-    )
-    return result.rows[0];
-}
-//recent books
-export const getRecentBooksService = async(user_id) => {
-    const result = await pool.query(
-        `SELECT 
-            id,title,author,status,current_page,total_pages,updated_at
-            FROM chapterly_books.books 
-            WHERE user_id = $1 
-            ORDER BY updated_at DESC LIMIT 5`,
-            [user_id]
-    );
-    return result.rows;
-}
-//genre
-export const getGenreAnalyticsService = async (user_id) => {
-    const result = await pool.query(
-        `SELECT genre, COUNT(*) AS count
-        FROM chapterly_books.books
-        WHERE user_id = $1 AND genre IS NOT NULL
-        GROUP BY genre
-        ORDER BY count DESC`,
-        [user_id]
-    );
-    return result.rows;
-}
-//language
-export const getLanguageAnalyticsService = async (user_id) => {
-    const result = await pool.query(
-        `SELECT language, COUNT(*) AS count
-        FROM chapterly_books.books
-        WHERE user_id = $1
-        AND language IS NOT NULL
-        GROUP BY language
-        ORDER BY count DESC`,
-        [user_id]
-    )
-    return result.rows;
-}
-//format
-export const getFormatAnalyticsService = async(user_id) => {
-    const result = await pool.query(
-        `SELECT format, COUNT(*) as count
-        FROM chapterly_books.books
-        WHERE user_id = $1
-        AND format IS NOT NULL
-        GROUP BY format
-        ORDER BY count DESC`,
-        [user_id]
-    )
-    return result.rows;
-}
-//monthly completed
-export const getMonthlyCompletedService = async (user_id) => {
-    const result = await pool.query(
-      `SELECT TO_CHAR(
-          finished_date,
-          'Month'
-        ) AS month,
-        COUNT(*) AS completed
-        FROM chapterly_books.books
-        WHERE user_id = $1
-        AND status = 'Completed'
-        AND finished_date IS NOT NULL
-        GROUP BY
-        EXTRACT(MONTH FROM finished_date), month
-        ORDER BY EXTRACT(MONTH FROM finished_date)`,
-        [user_id]
-    )
-    return result.rows;
+    paused_books: books.filter(
+      (b) => b.status === "Paused"
+    ).length,
+
+    dropped_books: books.filter(
+      (b) => b.status === "Dropped"
+    ).length,
+
+    total_pages_read: books.reduce(
+      (sum, book) => sum + (book.current_page || 0),
+      0
+    ),
   };
+};
+
+// recent books
+export const getRecentBooksService = async (user_id) => {
+  return await Book.find(
+    { user_id },
+    {
+      title: 1,
+      author: 1,
+      status: 1,
+      current_page: 1,
+      total_pages: 1,
+      updatedAt: 1,
+    }
+  )
+    .sort({ updatedAt: -1 })
+    .limit(5);
+};
+
+// genre analytics
+export const getGenreAnalyticsService = async (
+  user_id
+) => {
+  return await Book.aggregate([
+    {
+      $match: {
+        user_id,
+        genre: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$genre",
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { count: -1 },
+    },
+  ]);
+};
+
+// language analytics
+export const getLanguageAnalyticsService = async (
+  user_id
+) => {
+  return await Book.aggregate([
+    {
+      $match: {
+        user_id,
+        language: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$language",
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { count: -1 },
+    },
+  ]);
+};
+
+// format analytics
+export const getFormatAnalyticsService = async (
+  user_id
+) => {
+  return await Book.aggregate([
+    {
+      $match: {
+        user_id,
+        format: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$format",
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { count: -1 },
+    },
+  ]);
+};
+
+// monthly completed
+export const getMonthlyCompletedService = async (
+  user_id
+) => {
+  return await Book.aggregate([
+    {
+      $match: {
+        user_id,
+        status: "Completed",
+        finished_date: { $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          month: {
+            $month: "$finished_date",
+          },
+        },
+        completed: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $sort: {
+        "_id.month": 1,
+      },
+    },
+  ]);
+};
