@@ -2,9 +2,9 @@ import pool from "../config/db_config.js"
 import { createThoughtService, deleteThoughtService, getThoughtsByBookService, updateThoughtService } from "../services/thoughtService.js";
 
 const allowedTypes = [
-    "before",
-    "during",
-    "after",
+    "Before",
+    "During",
+    "After",
 ]
 //create thought
 export const createThoughtController = async(req, res) => {
@@ -12,7 +12,7 @@ export const createThoughtController = async(req, res) => {
         const {book_id,type,title,content,page_number,mood} = req.body;
 
         if(!allowedTypes.includes(type)) {
-            return res.status(400).json({message: "Content is required"})
+            return res.status(400).json({message: "Types is required"})
         }
 
         if(page_number < 0){
@@ -65,6 +65,33 @@ export const getThoughtsController = async(req,res) => {
     }
 }
 
+//get thought by id
+export const getThoughtByIdController = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await pool.query(
+            `SELECT t.* FROM chapterly_thoughts.thoughts t
+            JOIN chapterly_books.books b
+            ON t.book_id = b.id
+            WHERE t.id = $1 AND b.user_id = $2`,
+            [id, req.user.id]
+        );
+
+        if(result.rows.length === 0) {
+            return res.status(404).json({
+                message: "Thought not found"
+            });
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
 //update
 export const updateThoughtController = async(req,res) => {
     try {

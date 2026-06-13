@@ -72,6 +72,36 @@ export const getQuotesController = async(req,res) => {
     }
 }
 
+//get quote by id
+export const getQuoteByIdController = async (req, res) => {
+    try {
+        const {id} = req.params
+
+        const result = await pool.query(
+            `SELECT q.*
+                FROM chapterly_quotes.quotes q
+                JOIN chapterly_books.books b
+                ON q.book_id = b.id
+                WHERE q.id = $1
+                AND b.user_id = $2`,
+                [id, req.user.id]
+        )
+
+        if(result.rows.length === 0) {
+            return res.status(404).json({
+                message: "Quote not found"
+                })
+        }
+        res.json(result.rows[0])
+        
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+
+}
+
 //update
 export const updateQuoteController = async(req,res) => {
     try {
