@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import pool from "./config/db_config.js"
+import connectDB from "./config/db_config.js";
 import authRoutes from "./routes/authRoutes.js"
 import bookRoutes from "./routes/bookRoutes.js"
 import thoughtRoutes from "./routes/thoughtRoutes.js"
@@ -9,6 +9,8 @@ import quoteRoutes from "./routes/quoteRoutes.js"
 import dashboardRoutes from "./routes/dashboardRoutes.js"
 
 dotenv.config()
+
+connectDB();
 
 const app = express()
 
