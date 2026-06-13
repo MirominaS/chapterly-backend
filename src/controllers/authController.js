@@ -1,9 +1,8 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { findUserByEmail, createUser } from "../services/authService.js"
-import pool from '../config/db_config.js'
 import { verifyKindeToken } from "../middleware/kindeAuthMiddleware.js";
-
+import { findUserById } from "../services/authService.js";
 export const registerController = async (req,res) => {
     try {
         const {name, email, password} = req.body;
@@ -98,20 +97,29 @@ export const loginController = async (req,res) => {
     }
 }
 
-export const getUserController = async (req,res) => {
-    try {
-        const userId = req.user.id;
+export const getUserController = async (req, res) => {
+  try {
+    const userId = req.user.id;
 
-        const result = await pool.query(
-            "SELECT id,name,email FROM chapterly_users.users WHERE id = $1",
-            [userId]
-        );
+    const user = await findUserById(userId);
 
-        res.json(result.rows[0])
-    } catch (error) {
-        res.status(500).json({error:error.message})
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
-}
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 
 export const googleAuthController = async (req, res) => {
   try {

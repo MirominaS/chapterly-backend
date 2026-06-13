@@ -1,25 +1,31 @@
-import pool from '../config/db_config.js'
+import User from "../models/User.js";
 
 export const findUserByEmail = async (email) => {
-    const result = await pool.query(
-        "SELECT * FROM chapterly_users.users WHERE email = $1",
-        [email]
-    )
-    return result.rows[0]
+  return await User.findOne({ email });
 };
 
-export const createUser = async(
+export const findUserById = async (id) => {
+  return await User.findById(id);
+};
+
+export const createUser = async (
+  name,
+  email,
+  password = null,
+  auth_provider = "local",
+  google_id = null,
+) => {
+  const user = await User.create({
     name,
     email,
-    password = null,
-    auth_provider="local",
-    google_id=null
-) => {
-    const result = await pool.query(
-        `INSERT INTO chapterly_users.users (name,email,password,auth_provider, google_id)
-        VALUES ($1,$2,$3,$4, $5)
-        RETURNING id,name,email`,
-        [name,email,password,auth_provider,google_id]
-    )
-    return result.rows[0]
-}
+    password,
+    auth_provider,
+    google_id,
+  });
+
+  return {
+    id: user._id.toString(),
+    name: user.name,
+    email: user.email,
+  };
+};
