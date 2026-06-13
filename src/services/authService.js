@@ -14,6 +14,7 @@ export const createUser = async (
   password = null,
   auth_provider = "local",
   google_id = null,
+   role = "user"
 ) => {
   const user = await User.create({
     name,
@@ -21,11 +22,13 @@ export const createUser = async (
     password,
     auth_provider,
     google_id,
+    role,
   });
 
   return {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
+     role: user.role,
   };
 };

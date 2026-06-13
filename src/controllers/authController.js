@@ -27,7 +27,8 @@ export const registerController = async (req,res) => {
         const token = jwt.sign(
             {
                 id: user.id,
-                email:user.email
+                email:user.email,
+                role: user.role,
             },
             process.env.JWT_SECRET,
             {expiresIn:"7d"}
@@ -38,6 +39,7 @@ export const registerController = async (req,res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                   role: user.role,
             }
         })
         
@@ -79,6 +81,7 @@ export const loginController = async (req,res) => {
             {
                 id:user.id,
                 email:user.email,
+                   role: user.role,
             },
             process.env.JWT_SECRET,
             { expiresIn:"7d"}
@@ -90,6 +93,7 @@ export const loginController = async (req,res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                   role: user.role,
             }
         })
     } catch (error) {
@@ -113,6 +117,7 @@ export const getUserController = async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
+         role: user.role,
     });
   } catch (error) {
     res.status(500).json({
@@ -158,12 +163,15 @@ export const googleAuthController = async (req, res) => {
         "google",
         googleId
       );
+
+       user = await findUserByEmail(email);
     }
 
     const appToken = jwt.sign(
       {
         id: user.id,
         email: user.email,
+           role: user.role,
       },
       process.env.JWT_SECRET,
       {
