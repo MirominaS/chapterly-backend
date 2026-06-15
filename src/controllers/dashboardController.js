@@ -93,3 +93,32 @@ export const getMonthlyCompletedController = async(req,res) => {
         res.status(500).json({error: error.message})
     }
 }
+
+export const getCurrentlyReadingController =
+  async (req, res) => {
+    try {
+      const books =
+        await getCurrentlyReadingService(
+          req.user.id
+        );
+
+      const formattedBooks =
+        books.map((book) => ({
+          ...book.toObject(),
+          progress:
+            book.total_pages > 0
+              ? Math.round(
+                  (book.current_page /
+                    book.total_pages) *
+                    100
+                )
+              : 0,
+        }));
+
+      res.json(formattedBooks);
+    } catch (error) {
+      res.status(500).json({
+        error: error.message,
+      });
+    }
+  };

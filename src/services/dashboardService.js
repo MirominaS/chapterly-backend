@@ -150,3 +150,26 @@ export const getMonthlyCompletedService = async (
     },
   ]);
 };
+
+// dashboardService.js
+
+export const getCurrentlyReadingService =
+  async (user_id) => {
+    return await Book.find(
+      {
+        user_id,
+        status: "Ongoing",
+      },
+      {
+        title: 1,
+        author: 1,
+        current_page: 1,
+        total_pages: 1,
+        cover_image: 1,
+      }
+    )
+      .sort({
+        updatedAt: -1,
+      })
+      .limit(4);
+  };
